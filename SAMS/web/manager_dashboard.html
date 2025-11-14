@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SAMS | Organizer Dashboard</title>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+  --primary: #5e3505;
+  --secondary: #f4d35e;
+  --white: #fff;
+  --bg: #f7f7f7;
+  --text: #1a1a1a;
+  --radius: 12px;
+  --shadow: 0 6px 16px rgba(0,0,0,0.08);
+  --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif;}
+body{display:flex;background:var(--bg);min-height:100vh;}
+.sidebar{width:250px;background:var(--primary);color:var(--white);display:flex;flex-direction:column;padding:2rem 1rem;gap:1rem;}
+.sidebar h2{font-weight:700;font-size:1.6rem;margin-bottom:2rem;text-align:center;}
+.sidebar a{display:flex;align-items:center;gap:0.8rem;color:var(--white);text-decoration:none;padding:0.7rem 1rem;border-radius:var(--radius);transition:0.3s;font-weight:500;}
+.sidebar a.active,.sidebar a:hover{background:var(--secondary);color:var(--primary);}
+.main{flex:1;padding:2rem;overflow-y:auto;}
+.card{background:var(--white);margin-top:1rem;padding:1.5rem;border-radius:var(--radius);box-shadow:var(--shadow);}
+.btn{background:var(--gradient);color:var(--white);border:none;padding:0.7rem 1.2rem;border-radius:var(--radius);font-weight:600;cursor:pointer;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;z-index:999;}
+.modal-content{background:var(--white);padding:2rem;border-radius:var(--radius);width:90%;max-width:450px;box-shadow:var(--shadow);}
+.close-btn{background:#f87171;color:white;border:none;padding:0.5rem 1rem;border-radius:6px;margin-right:0.5rem;cursor:pointer;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1rem;}
+.stat-card{background:var(--white);padding:1rem;border-radius:var(--radius);text-align:center;box-shadow:var(--shadow);}
+.stat-card h3{color:var(--primary);}
+table{border-collapse:collapse;width:100%;margin-top:1rem;}
+th,td{padding:8px;border:1px solid #ddd;text-align:center;}
+th{background:var(--secondary);color:var(--primary);}
+.profile-form label{font-weight:600;display:block;margin-bottom:4px;}
+.profile-form input{width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;}
+.profile-avatar{width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--secondary);}
+.profile-container{text-align:center;margin-bottom:1rem;}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <h2>SAMS</h2>
+  <a href="#" class="active" data-section="dashboard">🏠 Dashboard</a>
+  <a href="#" data-section="my-events">📅 My Events</a>
+  <a href="#" data-section="create-event">➕ Create Event</a>
+  <a href="#" data-section="profile">👤 Profile</a>
+  <a href="login_signup.html">🚪 Logout</a>
+</aside>
+
+<!-- Main Content -->
+<section class="main">
+  <h1 id="section-title">Dashboard</h1>
+  <div id="section-content">
+    <!-- Dashboard Overview -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Events</h3>
+        <p id="stat-total">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Active Events</h3>
+        <p id="stat-active">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Bookings</h3>
+        <p id="stat-bookings">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Revenue (₹)</h3>
+        <p id="stat-revenue">0</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Event Booking Overview</h3>
+      <canvas id="bookingChart" height="150"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Modal Form -->
+<div class="modal" id="eventModal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Create New Event</h2>
+    <form id="eventForm" action="ManagerServlet" method="post">
+      <input type="hidden" name="action" id="formAction" value="create">
+      <input type="hidden" name="id" id="eventId">
+      <div class="form-group">
+        <label>Event Title</label>
+        <input type="text" name="title" required>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" name="date" required>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" rows="3" required style="width:100%;padding:8px;"></textarea>
+      </div>
+      <div class="form-actions" style="margin-top:1rem;">
+        <button type="button" class="close-btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn">Save Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const links = document.querySelectorAll('.sidebar a[data-section]');
+const title = document.getElementById('section-title');
+const content = document.getElementById('section-content');
+const modal = document.getElementById('eventModal');
+let editingEventId = null;
+
+// Sidebar navigation
+links.forEach(link=>{
+  link.addEventListener('click', async e=>{
+    e.preventDefault();
+    links.forEach(l=>l.classList.remove('active'));
+    link.classList.add('active');
+    const section = link.getAttribute('data-section');
+    title.textContent = link.textContent.trim();
+
+    if(section === "my-events") await loadMyEvents();
+    else if(section === "create-event") {
+      content.innerHTML = `<div class="card"><h3>Create New Event</h3><p>Click below to create an event.</p>
+      <button class="btn" onclick="openModal()">+ Create Event</button></div>`;
+    }
+    else if(section === "profile") showProfile();
+    else showDashboard();
+  });
+});
+
+// Dashboard
+function showDashboard(){
+  content.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><h3>Total Events</h3><p id="stat-total">0</p></div>
+      <div class="stat-card"><h3>Active Events</h3><p id="stat-active">0</p></div>
+      <div class="stat-card"><h3>Total Bookings</h3><p id="stat-bookings">0</p></div>
+      <div class="stat-card"><h3>Revenue (₹)</h3><p id="stat-revenue">0</p></div>
+    </div>
+    <div class="card"><h3>Event Booking Overview</h3><canvas id="bookingChart" height="150"></canvas></div>`;
+  drawChart();
+}
+
+// Chart
+function drawChart(){
+  const ctx = document.getElementById("bookingChart");
+  new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:[],
+      datasets:[{
+        label:"Bookings",
+        data:[],
+        backgroundColor:"#0d3b66"
+      }]
+    },
+    options:{responsive:true,scales:{y:{beginAtZero:true}}}
+  });
+}
+
+// Load events from servlet
+async function loadMyEvents(){
+  content.innerHTML = `<div class="card"><h3>Loading events...</h3></div>`;
+  try {
+    const res = await fetch('ManagerServlet');
+    const data = await res.json();
+    let rows = "";
+    let total = 0, active = 0, bookings = 0;
+    data.forEach(ev=>{
+      total++;
+      if(ev.status === "Active") active++;
+      bookings += ev.bookings;
+      rows += `
+        <tr>
+          <td>${ev.title}</td>
+          <td>${ev.date}</td>
+          <td>${ev.status}</td>
+          <td>${ev.bookings}</td>
+          <td>
+            <button class="btn" onclick='showDetails(${JSON.stringify(ev)})'>👁️ View</button>
+            <button class="btn" style="background:#f4d35e;color:#000;" onclick='editEvent(${JSON.stringify(ev)})'>✏️ Edit</button>
+            <button class="btn" style="background:#f87171;" onclick='deleteEvent(${ev.id})'>🗑️ Delete</button>
+          </td>
+        </tr>`;
+    });
+
+    content.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><h3>Total Events</h3><p>${total}</p></div>
+        <div class="stat-card"><h3>Active Events</h3><p>${active}</p></div>
+        <div class="stat-card"><h3>Total Bookings</h3><p>${bookings}</p></div>
+        <div class="stat-card"><h3>Revenue (₹)</h3><p>${bookings*100}</p></div>
+      </div>
+      <div class="card">
+        <h3>My Events</h3>
+        <table>
+          <tr><th>Title</th><th>Date</th><th>Status</th><th>Bookings</th><th>Actions</th></tr>
+          ${rows || "<tr><td colspan='5'>No events yet.</td></tr>"}
+        </table>
+      </div>`;
+  } catch(e){
+    console.log(e);
+    content.innerHTML = `<div class="card"><h3>Error loading events!</h3></div>`;
+  }
+}
+
+// Show details
+function showDetails(ev){
+  alert(`📅 ${ev.title}\nDate: ${ev.date}\nStatus: ${ev.status}\nBookings: ${ev.bookings}\nDescription: ${ev.description}`);
+}
+
+// Modal controls
+function openModal(){
+  modal.style.display = 'flex';
+  document.getElementById('eventForm').reset();
+  editingEventId = null;
+  document.getElementById('formAction').value = "create";
+  document.getElementById('eventId').value = "";
+  document.getElementById('modalTitle').textContent = "Create New Event";
+}
+function closeModal(){ modal.style.display = 'none'; }
+
+function editEvent(ev){
+  openModal();
+  editingEventId = ev.id;
+  document.getElementById('modalTitle').textContent = "Edit Event";
+  document.getElementById('formAction').value = "update";
+  document.getElementById('eventId').value = ev.id;
+  const form = document.getElementById('eventForm');
+  form.title.value = ev.title;
+  form.date.value = ev.date;
+  form.description.value = ev.description;
+}
+
+function deleteEvent(id){
+  if(confirm("Are you sure to delete this event?")){
+    fetch('ManagerServlet',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:`action=delete&id=${id}`
+    }).then(res=>res.json()).then(resp=>{
+      if(resp.status==="success") loadMyEvents();
+      else alert("Delete failed!");
+    });
+  }
+}
+
+// Submit create/update form
+document.getElementById('eventForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const body = new URLSearchParams(form).toString();
+
+  fetch('ManagerServlet',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body: body
+  }).then(res=>res.json()).then(resp=>{
+    if(resp.status==="success") loadMyEvents();
+    else alert("Action failed!");
+    closeModal();
+  });
+});
+
+// Profile section
+function showProfile(){
+  content.innerHTML = `
+    <div class="card">
+      <div class="profile-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-avatar" alt="Profile Picture">
+        <h2>Organizer Profile</h2>
+      </div>
+      <form class="profile-form" id="profileForm">
+        <label>Full Name</label>
+        <input type="text" name="name" value="John Doe" required>
+        <label>Email</label>
+        <input type="email" name="email" value="johndoe@gmail.com" required>
+        <label>Phone</label>
+        <input type="text" name="phone" value="9876543210" required>
+        <label>Organization</label>
+        <input type="text" name="organization" value="RGUKT Valley" required>
+        <button type="submit" class="btn" style="margin-top:10px;">Update Profile</button>
+      </form>
+    </div>`;
+
+  document.getElementById("profileForm").onsubmit = function(e){
+    e.preventDefault();
+    alert("Profile updated successfully (demo).");
+  };
+}
+
+// Initialize
+drawChart();
+loadMyEvents();
+</script>
+</body>
+</html>

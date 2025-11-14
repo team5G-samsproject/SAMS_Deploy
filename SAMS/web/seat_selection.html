@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SAMS | Seat Selection</title>
+<style>
+/* (same styles as you had before) */
+:root { --primary:#5e3505; --secondary:#ffd54f; --accent:#ee6c4d; --bg:#f7f7f7; --text:#1a1a1a; --radius:12px; --shadow:0 6px 16px rgba(0,0,0,0.08); --gradient:linear-gradient(135deg,var(--primary),var(--secondary)); }
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif;}
+body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+header{ text-align:center;background:var(--gradient);color:white;padding:2rem 1rem;border-radius:0 0 var(--radius) var(--radius);width:100%;box-shadow:var(--shadow);}
+header h1{font-size:2rem;font-weight:700;}
+.event-info{background:white;box-shadow:var(--shadow);border-radius:var(--radius);margin:2rem 0 1rem;padding:1.5rem 2rem;max-width:600px;width:90%;text-align:center;border-left:6px solid var(--primary);}
+.event-info h2{color:var(--primary);margin-bottom:0.3rem;}
+.seat-map{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;background:white;box-shadow:var(--shadow);border-radius:var(--radius);padding:2rem;width:90%;max-width:600px;justify-items:center;border:2px solid var(--secondary);}
+.seat{width:36px;height:36px;border-radius:8px;font-weight:600;font-size:0.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease;user-select:none;}
+.seat.available{background:#fdf2c3;color:#805600;border:1px solid #f4d35e}
+.seat.available:hover{transform:scale(1.1);background:#ffe680;}
+.seat.selected{background:var(--gradient);color:white;transform:scale(1.1);}
+.seat.booked{background:#f8d7da;color:#721c24;border:1px solid #f5c2c7;cursor:not-allowed;opacity:0.8;}
+.seat.reserved{background:#ffdede;color:#7a2b2b;border:1px dashed #ff9b9b;cursor:not-allowed;opacity:0.95;} /* reserved by others while pending */
+.seat.vip{background:#c3e6cb;border:1px solid #28a745;color:#155724;cursor:not-allowed;}
+.seat.ordinary{background:#ffeeba;border:1px solid #ffc107;color:#856404;}
+.seat.balcony{background:#b8daff;border:1px solid #004085;color:#004085;}
+.legend{display:flex;justify-content:center;align-items:center;gap:1rem;margin:1.5rem 0;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:.5rem;font-size:.9rem;color:#444;}
+.legend-box{width:18px;height:18px;border-radius:4px;}
+.vip-box{background:#c3e6cb;border:1px solid #28a745;}
+.ordinary-box{background:#ffeeba;border:1px solid #ffc107;}
+.balcony-box{background:#b8daff;border:1px solid #004085;}
+.selected-box{background:var(--gradient);}
+.booked-box{background:#f8d7da;border:1px solid #f5c2c7;}
+.summary{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem 2rem;text-align:center;width:90%;max-width:600px;margin-bottom:2rem;border-left:6px solid var(--primary);}
+.proceed-btn{background:var(--gradient);color:white;border:none;padding:.9rem 2rem;border-radius:var(--radius);font-weight:600;font-size:1rem;cursor:pointer;box-shadow:var(--shadow);margin:1.5rem 0 2rem;transition:transform .3s ease,box-shadow .3s ease;}
+.proceed-btn:hover{transform:scale(1.05);box-shadow:0 12px 24px rgba(0,0,0,0.2);}
+footer{text-align:center;background:var(--gradient);color:white;padding:1rem;font-size:.9rem;width:100%;margin-top:auto;}
+@media(max-width:600px){.seat-map{grid-template-columns:repeat(6,1fr);padding:1.5rem;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Seat Selection</h1>
+  <p>Choose your preferred seats for the event</p>
+</header>
+
+<div class="event-info">
+  <h2 id="eventName">🎶 Event Name</h2>
+  <span id="eventDate">📅 Date: TBA</span><br>
+  <span>Venue: RGUKT Auditorium</span>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-box vip-box"></div> VIP (Guest Only)</div>
+  <div class="legend-item"><div class="legend-box ordinary-box"></div> Ordinary (₹100)</div>
+  <div class="legend-item"><div class="legend-box balcony-box"></div> Balcony (₹150)</div>
+  <div class="legend-item"><div class="legend-box selected-box"></div> Selected</div>
+  <div class="legend-item"><div class="legend-box booked-box"></div> Booked / Reserved</div>
+</div>
+
+<div class="seat-map" id="seat-map"></div>
+
+<div class="summary" id="summary">
+  <span><strong>Selected Seats:</strong> None</span>
+  <span><strong>Total:</strong> ₹0</span>
+</div>
+
+<button class="proceed-btn" id="proceed-btn">Proceed to Payment</button>
+
+<script>
+/*
+ Flow implemented:
+  - on load: fetch current reservations/confirmed seats for the event -> mark seat elements as reserved/booked
+  - user selects seats -> UI marks selected
+  - on proceed: call BookingServlet?action=reserve -> creates PENDING reservation (holds seats)
+     response includes reservationId -> redirect to payment_page.html?reservationId=...&seats=...&total=...
+  - Payment page should call BookingServlet?action=markPaid with reservationId (we provide payment_page sample earlier)
+  - Salesperson dashboard will fetch BookingServlet?action=listPaid to get PAID reservations and confirm them
+*/
+
+const params = new URLSearchParams(window.location.search);
+const eventNameParam = params.get("name") || params.get("event") || "Unknown Event";
+const eventDateParam = params.get("date") || "TBA";
+
+document.getElementById("eventName").textContent = "🎶 " + decodeURIComponent(eventNameParam);
+document.getElementById("eventDate").textContent = "📅 Date: " + decodeURIComponent(eventDateParam);
+
+const seatMap = document.getElementById("seat-map");
+const summary = document.getElementById("summary");
+const proceedBtn = document.getElementById("proceed-btn");
+
+const rows = 8, cols = 10;
+const seatPrices = { ordinary: 100, balcony: 150 };
+const seatCategories = new Map();
+const selectedSeats = new Set();
+
+// this will be filled from server (PENDING/PAID/CONFIRMED seats)
+let occupiedSeats = {}; // { seatId: {status: "PENDING"/"PAID"/"CONFIRMED", reservationId, user} }
+
+// helper to load occupied seats from server
+async function fetchOccupied() {
+  try {
+    const res = await fetch(`BookingServlet?action=getSeats&event=${encodeURIComponent(eventNameParam)}`);
+    if (!res.ok) throw new Error("Server error");
+    const arr = await res.json();
+    occupiedSeats = {};
+    arr.forEach(r => {
+      const seats = (r.seats || "").split(",").map(s => s.trim()).filter(s => s);
+      seats.forEach(s => {
+        occupiedSeats[s] = { status: r.status, reservationId: r.id, user: r.user };
+      });
+    });
+  } catch (e) {
+    console.error("Unable to fetch occupied seats:", e);
+    occupiedSeats = {};
+  }
+}
+
+// build seats grid and apply server info
+async function buildSeats() {
+  await fetchOccupied();
+  seatMap.innerHTML = "";
+  for (let i = 0; i < rows; i++) {
+    const rowLetter = String.fromCharCode(65 + i);
+    for (let j = 1; j <= cols; j++) {
+      const seatId = rowLetter + j;
+      const seat = document.createElement("div");
+      seat.classList.add("seat");
+      seat.textContent = j;
+
+      let category;
+      if (i === 0) category = "vip";
+      else if (i >= 6) category = "balcony";
+      else category = "ordinary";
+
+      seat.classList.add(category);
+      seat.dataset.id = seatId;
+      seat.dataset.category = category;
+
+      const occ = occupiedSeats[seatId];
+      if (occ) {
+        // show differently for pending vs confirmed:
+        if (occ.status === "CONFIRMED") {
+          seat.classList.add("booked");
+          seat.title = "Booked";
+        } else if (occ.status === "PENDING") {
+          seat.classList.add("reserved");
+          seat.title = "Reserved (awaiting payment/confirmation)";
+        } else if (occ.status === "PAID") {
+          seat.classList.add("reserved");
+          seat.title = "Paid (awaiting salesperson confirmation)";
+        } else {
+          seat.classList.add("booked");
+          seat.title = occ.status;
+        }
+      } else if (category === "vip") {
+        seat.classList.add("booked");
+        seat.title = "VIP Seat (Guest Only)";
+      } else {
+        seat.classList.add("available");
+        seat.addEventListener("click", () => toggleSeat(seat, seatId));
+      }
+
+      seatMap.appendChild(seat);
+      seatCategories.set(seatId, category);
+    }
+  }
+  updateSummary();
+}
+
+// toggle seat selection locally
+function toggleSeat(seat, seatId) {
+  // protect if seat just became occupied
+  if (seat.classList.contains("booked") || seat.classList.contains("reserved")) return;
+
+  if (seat.classList.contains("selected")) {
+    seat.classList.remove("selected");
+    seat.classList.add("available");
+    selectedSeats.delete(seatId);
+  } else {
+    seat.classList.remove("available");
+    seat.classList.add("selected");
+    selectedSeats.add(seatId);
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  let total = 0;
+  selectedSeats.forEach(id => {
+    const cat = seatCategories.get(id);
+    total += seatPrices[cat] || 0;
+  });
+  summary.innerHTML = `
+    <span><strong>Selected Seats:</strong> ${selectedSeats.size > 0 ? Array.from(selectedSeats).join(", ") : "None"}</span>
+    <span><strong>Total:</strong> ₹${total}</span>
+  `;
+}
+
+// Reserve seats: POST to BookingServlet?action=reserve
+async function reserveSeats(seats, total, user) {
+  const body = new URLSearchParams();
+  body.append("action", "reserve");
+  body.append("event", eventNameParam);
+  body.append("seats", seats);
+  body.append("user", user || "anonymous");
+  body.append("total", total);
+
+  const res = await fetch('BookingServlet', { method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded' }, body: body.toString() });
+  return res.json();
+}
+
+// when user clicks proceed
+proceedBtn.addEventListener("click", async () => {
+  if (selectedSeats.size === 0) {
+    alert("Please select at least one seat to proceed!");
+    return;
+  }
+
+  // fetch latest occupied seats again to avoid race
+  await fetchOccupied();
+  // check conflict with server-side occupied seats
+  const requested = Array.from(selectedSeats);
+  const conflicts = requested.filter(s => occupiedSeats[s]);
+  if (conflicts.length) {
+    alert("Sorry, some seats were just reserved/booked by others: " + conflicts.join(", ") + ". UI will refresh.");
+    await buildSeats();
+    return;
+  }
+
+  const total = requested.reduce((sum, id) => sum + (seatPrices[seatCategories.get(id)] || 0), 0);
+
+  // user info - replace with real logged-in user id/email if available
+  const user = prompt("Enter your name or student id (for demo):", "student123");
+  if (!user) return;
+
+  // call reserve
+  try {
+    const resp = await reserveSeats(requested.join(","), total, user);
+    if (resp.status === "conflict") {
+      alert("Conflict: seats already taken: " + resp.conflicts.join(", "));
+      await buildSeats();
+      return;
+    } else if (resp.status === "success") {
+      const reservationId = resp.reservationId;
+      // redirect to payment page with reservationId
+      // payment_page.html should call BookingServlet?action=markPaid after successful payment
+      window.location.href = `payment_page.html?reservationId=${reservationId}&seats=${encodeURIComponent(requested.join(","))}&total=${total}&event=${encodeURIComponent(eventNameParam)}`;
+      return;
+    } else {
+      alert("Failed to reserve seats, try again.");
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Server error reserving seats.");
+  }
+});
+
+// build initial UI
+buildSeats();
+
+// reload occupied seats occasionally so others' reservations are visible (polling)
+setInterval(() => {
+  // only refresh seat statuses (don't wipe user selection unless conflict)
+  fetchOccupied().then(() => {
+    // iterate seat elements and update classes for occupied
+    document.querySelectorAll('.seat').forEach(seat => {
+      const id = seat.dataset.id;
+      const occ = occupiedSeats[id];
+      if (occ) {
+        seat.classList.remove('available','selected');
+        seat.classList.add( occ.status === "CONFIRMED" ? 'booked' : 'reserved' );
+        seat.title = occ.status === "CONFIRMED" ? 'Booked' : (occ.status === "PAID" ? 'Paid (awaiting confirmation)' : 'Reserved (awaiting payment/confirmation)');
+        // if a seat we selected got reserved by someone else, remove it from selection
+        if (selectedSeats.has(id)) {
+          selectedSeats.delete(id);
+        }
+      } else {
+        // if not occupied and not VIP, allow available
+        if (!seat.classList.contains('vip') && !seat.classList.contains('selected')) {
+          seat.classList.remove('booked','reserved');
+          seat.classList.add('available');
+          seat.title = '';
+        }
+      }
+    });
+    updateSummary();
+  }).catch(e=>console.error(e));
+}, 7000); // poll every 7 seconds (adjust as you like)
+</script>
+
+<footer>© 2025 Team 5G | Student Auditorium Management Software</footer>
+</body>
+</html>

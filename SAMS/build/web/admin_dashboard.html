@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMS | Admin Dashboard</title>
+<style>
+:root {
+  --blue: #5e3505;
+  --yellow: #ffd54f;
+  --dark: #1e293b;
+  --bg: #f8fafc;
+  --gradient: linear-gradient(135deg, var(--blue), var(--yellow));
+  --radius: 12px;
+  --shadow: 0 6px 16px rgba(0,0,0,0.1);
+  --white: #fff;
+  --text: #1f2937;
+}
+
+* {margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif;}
+body {
+  display:flex;
+  background: var(--bg);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 250px;
+  background: var(--gradient);
+  color: var(--white);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:2rem 1rem;
+  gap:1rem;
+  box-shadow: var(--shadow);
+}
+.sidebar h2 {
+  font-weight:700;
+  letter-spacing:1px;
+  margin-bottom:1rem;
+  text-shadow:0 2px 4px rgba(0,0,0,0.2);
+}
+.sidebar a {
+  color: var(--white);
+  text-decoration:none;
+  padding:0.8rem 1rem;
+  border-radius: var(--radius);
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:500;
+  transition: all .3s ease;
+}
+.sidebar a:hover, .sidebar a.active {
+  background: rgba(255,255,255,0.25);
+  transform: translateX(4px);
+}
+
+/* ===== Main ===== */
+.main {
+  flex:1;
+  padding:2rem;
+  overflow-y:auto;
+}
+.main h1 {
+  color: var(--dark);
+  margin-bottom:1.5rem;
+  font-size:2rem;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.main h1::before {
+  content:"🏢";
+  font-size:1.8rem;
+}
+
+/* ===== Content Boxes ===== */
+.content-box {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding:1.8rem;
+  box-shadow: var(--shadow);
+  margin-bottom:1.8rem;
+  transition: transform .2s;
+}
+.content-box:hover {
+  transform: translateY(-2px);
+}
+.content-box h2 {
+  color: var(--blue);
+  margin-bottom:1rem;
+}
+
+/* ===== Stats Grid ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.2rem;
+}
+.stat-card {
+  background: #fffaf0;
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+  border-left: 6px solid var(--yellow);
+}
+.stat-card h3 {
+  color: var(--blue);
+  font-size: 2rem;
+  margin-bottom:0.4rem;
+}
+.stat-card p {
+  color: var(--dark);
+  font-weight:500;
+}
+
+/* ===== Tables ===== */
+.table {
+  width:100%;
+  border-collapse: collapse;
+  margin-top:1rem;
+  font-size:0.95rem;
+}
+.table th, .table td {
+  padding:0.8rem;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+.table th {
+  background:#fffbeb;
+  color: var(--dark);
+  font-weight:600;
+}
+.table tr:hover {
+  background:#f9fafb;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  background: var(--gradient);
+  color: var(--white);
+  border:none;
+  padding:0.5rem 1.1rem;
+  border-radius:6px;
+  cursor:pointer;
+  transition: all .3s ease;
+  font-weight:600;
+}
+.btn:hover {
+  opacity:0.9;
+  transform:scale(1.05);
+}
+
+/* ===== Add Admin Form ===== */
+.add-admin {
+  margin-top: 1.5rem;
+  background: #f3f4f6;
+  padding: 1rem;
+  border-radius: var(--radius);
+}
+.add-admin h3 {
+  color: var(--blue);
+  margin-bottom:0.6rem;
+}
+.add-admin input, .add-admin select {
+  padding: 0.6rem;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size:0.95rem;
+}
+.add-admin button {margin-top: 0.5rem;}
+#addMsg {margin-top:8px; font-weight:600;}
+
+/* Scrollbar */
+::-webkit-scrollbar {width:8px;}
+::-webkit-scrollbar-thumb {background:rgba(0,0,0,0.2); border-radius:10px;}
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar">
+  <h2>🧾 SAMS Admin</h2>
+  <a href="#" class="active" onclick="showSection('reports', event)">📊 Reports</a>
+  <a href="#" onclick="showSection('manageUsers', event)">👥 Manage Users</a>
+  <a href="login_signup.html">🚪 Logout</a>
+</aside>
+
+<!-- ===== Main Content ===== -->
+<section class="main">
+  <h1>Admin Dashboard</h1>
+
+  <!-- ===== Reports Section ===== -->
+  <div id="reports" class="content-box">
+    <h2>📈 System Reports Overview</h2>
+    <p style="color:#555;margin-bottom:1rem;">
+      Welcome back, <b>Admin!</b> Here’s a quick summary of your system performance today.
+    </p>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><h3>₹1,25,000</h3><p>Total Revenue</p></div>
+      <div class="stat-card"><h3>245</h3><p>Total Bookings</p></div>
+      <div class="stat-card"><h3>34</h3><p>Approved Events</p></div>
+      <div class="stat-card"><h3>8</h3><p>Pending Events</p></div>
+    </div>
+  </div>
+
+  <!-- ===== Manage Users Section ===== -->
+  <div id="manageUsers" class="content-box" style="display:none;">
+    <h2>👥 Manage Administrators</h2>
+    <p style="color:#555;">You can add, view, or remove system administrators and staff below.</p>
+
+    <div class="add-admin">
+      <h3>Add New </h3>
+      <input type="text" id="name" placeholder="Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <select id="role">
+        <option value="manager">Manager</option>
+        <option value="salesperson">Salesperson</option>
+      </select>
+      <button class="btn" onclick="addAdmin()">Add </button>
+      <p id="addMsg"></p>
+    </div>
+
+    <table class="table" id="adminTable">
+      <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Ravi Kumar</td><td>ravi@sams.com</td><td>Manager</td><td>2025-10-10</td>
+        <td><button class="btn" style="background:#dc2626" onclick="alert('Demo delete!')">Delete</button></td></tr>
+        <tr><td>2</td><td>Priya Singh</td><td>priya@sams.com</td><td>Salesperson</td><td>2025-09-24</td>
+        <td><button class="btn" style="background:#dc2626" onclick="alert('Demo delete!')">Delete</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== Script ===== -->
+<script>
+function showSection(id, e) {
+  document.querySelectorAll('.content-box').forEach(div => div.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  if(id === 'reports') loadStats();
+  if(id === 'manageUsers') loadAdmins();
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('AdminServlet?action=getStats');
+    if(!res.ok) throw new Error('Server not available');
+    const data = await res.json();
+    const grid = document.getElementById('statsGrid');
+    grid.innerHTML = `
+      <div class="stat-card"><h3>₹${data.revenue}</h3><p>Total Revenue</p></div>
+      <div class="stat-card"><h3>${data.bookings}</h3><p>Total Bookings</p></div>
+      <div class="stat-card"><h3>${data.approved}</h3><p>Approved Events</p></div>
+      <div class="stat-card"><h3>${data.pending}</h3><p>Pending Events</p></div>
+    `;
+  } catch (err) {
+    console.log("Static data mode active.");
+  }
+}
+
+async function loadAdmins() {
+  try {
+    const res = await fetch('AdminServlet?action=getAdmins');
+    const data = await res.json();
+    const tbody = document.querySelector('#adminTable tbody');
+    tbody.innerHTML = '';
+    data.forEach(a => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${a.admin_id}</td>
+          <td>${a.name}</td>
+          <td>${a.email}</td>
+          <td>${a.role}</td>
+          <td>${a.created_at}</td>
+          <td><button class="btn" style="background:#dc2626" onclick="deleteAdmin(${a.admin_id})">Delete</button></td>
+        </tr>`;
+    });
+  } catch (err) {
+    console.log("Static data mode active.");
+  }
+}
+
+async function addAdmin() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const role = document.getElementById('role').value;
+  const msg = document.getElementById('addMsg');
+  if(!name || !email || !password) { msg.style.color='red'; msg.textContent='⚠️ Fill all fields'; return; }
+
+  const formData = new URLSearchParams({action:'addAdmin', name, email, password, role});
+  const res = await fetch('AdminServlet', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:formData});
+  const data = await res.json();
+  if(data.success) {
+    msg.style.color='green'; msg.textContent='✅ Admin added successfully!';
+    loadAdmins();
+  } else {
+    msg.style.color='red'; msg.textContent=data.error || '❌ Failed';
+  }
+}
+
+async function deleteAdmin(id){
+  if(!confirm('Are you sure to delete this admin?')) return;
+  const res = await fetch(`AdminServlet?action=deleteAdmin&id=${id}`);
+  const data = await res.json();
+  if(data.success) loadAdmins();
+}
+
+window.onload = loadStats;
+</script>
+
+</body>
+</html>

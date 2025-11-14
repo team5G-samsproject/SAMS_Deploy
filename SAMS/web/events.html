@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMS | Events</title>
+<style>
+:root {
+  --primary: #5e3505;
+  --secondary: #ffd54f;
+  --accent: #d0b3ff;
+  --bg: #f9f7fb;
+  --card-bg: #ffffff;
+  --text: #4a3f55;
+  --radius: 12px;
+  --shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- NAVBAR ---------- */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--primary);
+  color: white;
+  position: sticky;
+  top: 0;
+  box-shadow: var(--shadow);
+  z-index: 50;
+}
+nav .logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+nav ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+nav ul li a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: 0.3s;
+}
+nav ul li a:hover {
+  color: var(--secondary);
+}
+
+/* ---------- HEADER ---------- */
+.page-header {
+  text-align: center;
+  padding: 4rem 1rem 2rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.page-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.8rem;
+  font-weight: 800;
+}
+.page-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ---------- EVENTS GRID ---------- */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  width: 90%;
+  max-width: 1200px;
+  margin: 3rem auto;
+}
+.event-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: 0.3s;
+}
+.event-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+.event-img {
+  height: 180px;
+  background: var(--secondary);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.event-content {
+  padding: 1.2rem;
+  flex-grow: 1;
+}
+.event-content h3 {
+  color: var(--primary);
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+.event-content p {
+  font-size: 0.9rem;
+  color: #6d5c7d;
+  margin-bottom: 0.8rem;
+}
+.event-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+.event-card button {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.9rem;
+  font-weight: 600;
+  border-radius: 0 0 var(--radius) var(--radius);
+  cursor: pointer;
+  transition: 0.3s;
+}
+.event-card button:hover {
+  background: var(--accent);
+  transform: scale(1.03);
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+  margin-top: auto;
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 1.2rem;
+  font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+
+<!-- ---------- NAVBAR ---------- -->
+<nav>
+  <div class="logo">SAMS</div>
+  <ul>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="login_signup.html">Login/Signup</a></li>
+  </ul>
+</nav>
+
+<!-- ---------- HEADER ---------- -->
+<section class="page-header">
+  <h1>Upcoming Events</h1>
+  <p>Book your favorite shows and cultural programs with ease!</p>
+</section>
+
+<!-- ---------- EVENTS SECTION ---------- -->
+<section class="events-grid" id="eventsGrid">
+  <p style="text-align:center;">Loading events...</p>
+</section>
+
+<!-- ---------- FOOTER ---------- -->
+<footer>
+  © 2025 Team 5G | Student Auditorium Management Software
+</footer>
+
+<!-- ---------- SCRIPT ---------- -->
+<script>
+async function loadEvents() {
+  const grid = document.getElementById("eventsGrid");
+  grid.innerHTML = `<p style="text-align:center;">Loading events...</p>`;
+
+  try {
+    const res = await fetch("ManagerServlet");
+    const data = await res.json();
+
+    if (res.ok && Array.isArray(data) && data.length > 0) {
+      grid.innerHTML = "";
+      data.forEach(ev => {
+        const card = document.createElement("div");
+        card.className = "event-card";
+        card.innerHTML = `
+          <div class="event-img">🎫 ${ev.title}</div>
+          <div class="event-content">
+            <h3>${ev.title}</h3>
+            <p>${ev.description}</p>
+            <div class="event-info">
+              <span>📅 ${ev.date}</span>
+            </div>
+          </div>
+          <button class="book-btn">Book Now</button>
+        `;
+
+        // When clicked, go to seat_selection.html
+        card.querySelector(".book-btn").addEventListener("click", () => {
+  alert("Please log in first to continue with your booking!");
+});
+
+        grid.appendChild(card);
+      });
+    } else {
+      grid.innerHTML = `<p style="text-align:center;">No events available yet.</p>`;
+    }
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = `<p style="text-align:center;">⚠️ Unable to load events!</p>`;
+  }
+}
+
+loadEvents();
+</script>
+
+</body>
+</html>

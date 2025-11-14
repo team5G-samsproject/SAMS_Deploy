@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMS | Payment</title>
+<style>
+:root{
+  --primary:#5e3505;
+  --secondary:#ffd54f;
+  --accent:#ee6c4d;
+  --bg:#f7f7f7;
+  --text:#1a1a1a;
+  --radius:12px;
+  --shadow:0 6px 16px rgba(0,0,0,0.08);
+  --gradient:linear-gradient(135deg,var(--primary),var(--secondary));
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif;}
+body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+header{background:var(--gradient);color:#fff;text-align:center;padding:2rem 1rem;border-radius:0 0 var(--radius) var(--radius);width:100%;box-shadow:var(--shadow);}
+header h1{font-size:2rem;font-weight:700;}
+header p{opacity:0.9;}
+.container{background:#fff;margin:2rem 0;padding:2rem 2.5rem;border-radius:var(--radius);box-shadow:var(--shadow);max-width:480px;width:90%;display:flex;flex-direction:column;gap:1.2rem;border-left:6px solid var(--primary);}
+.summary{background:#fff9e6;padding:1rem 1.2rem;border-radius:var(--radius);box-shadow:inset 0 0 4px rgba(0,0,0,.05);border-left:6px solid var(--primary);}
+.summary span{display:block;margin:.3rem 0;}
+.qr-section{text-align:center;margin-top:0.5rem;}
+.qr-section img{width:200px;height:200px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.qr-section p{font-size:0.9rem;margin-top:0.5rem;}
+.btn{background:var(--gradient);color:#fff;border:none;padding:.9rem;font-size:1rem;border-radius:var(--radius);font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:transform .3s ease;}
+.btn:hover{transform:scale(1.05);box-shadow:0 12px 24px rgba(0,0,0,0.2);}
+.success{display:none;text-align:center;padding:2rem;}
+.success h2{color:var(--primary);}
+.checkmark{width:80px;height:80px;border-radius:50%;display:inline-block;border:6px solid var(--primary);position:relative;margin-bottom:1rem;}
+.checkmark::after{content:"";position:absolute;left:22px;top:10px;width:20px;height:40px;border-right:6px solid var(--primary);border-bottom:6px solid var(--primary);transform:rotate(45deg) scale(0);transform-origin:center;animation:tick .5s ease forwards .4s;}
+@keyframes tick{to{transform:rotate(45deg) scale(1);}}
+footer{margin-top:auto;text-align:center;background:var(--gradient);color:#fff;padding:1rem;font-size:.9rem;width:100%;}
+@media(max-width:480px){.container{padding:1.5rem;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Payment Portal</h1>
+  <p>Complete your booking securely</p>
+</header>
+
+<div class="container" id="payment-container">
+  <div class="summary" id="summaryBox">
+    <span><strong>Event:</strong> Loading...</span>
+    <span><strong>Seats:</strong> Loading...</span>
+    <span><strong>Total Amount:</strong> ₹0</span>
+  </div>
+
+  <div class="qr-section">
+    <h3>Scan & Pay via UPI</h3>
+    <img src="images/qr.jpg" alt="UPI QR Code">
+    <p>Scan using PhonePe / GPay / Paytm</p>
+    <p>UPI ID: <strong>yourupiid@okaxis</strong></p>
+  </div>
+
+  <button class="btn" id="confirmBtn">I Have Paid</button>
+</div>
+
+<!-- Ticket Processing Screen -->
+<div class="success" id="success">
+  <div class="checkmark"></div>
+  <h2>Payment Received!</h2>
+  <p>Your ticket is being processed.</p>
+  <p>Thank you for booking 🎉</p>
+  <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+    <button class="btn" onclick="window.location.href='student_dashboard.html'">Back to Dashboard</button>
+    <button class="btn" onclick="window.location.href='events.html'">Back to Events</button>
+  </div>
+</div>
+
+<footer>© 2025 Team 5G | Student Auditorium Management Software</footer>
+
+<script>
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    event: params.get("event") || "N/A",
+    seats: params.get("seats") || "N/A",
+    amount: params.get("amount") || params.get("price") || params.get("total") || "0"
+  };
+}
+
+const { event, seats, amount } = getQueryParams();
+document.getElementById("summaryBox").innerHTML = `
+  <span><strong>Event:</strong> ${event}</span>
+  <span><strong>Seats:</strong> ${seats}</span>
+  <span><strong>Total Amount:</strong> ₹${amount}</span>
+`;
+
+const confirmBtn=document.getElementById("confirmBtn");
+const container=document.getElementById("payment-container");
+const success=document.getElementById("success");
+
+confirmBtn.onclick=()=>{
+  const paid=confirm("Please confirm that you have completed the UPI payment.");
+  if(paid){
+    confirmBtn.textContent="Verifying Payment...";
+    confirmBtn.disabled=true;
+    setTimeout(()=>{
+      container.style.display="none";
+      success.style.display="block";
+      // TODO: send data to servlet for sales confirmation
+    },1500);
+  }
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/index.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/db/DBConnection.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/admin_dashboard.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/manager_dashboard.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/student_dashboard.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/ManagerServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/BookingServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/AdminServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/StudentServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/StudentBookingServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/TicketServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/payment_page.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/events.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/salesperson_dashboard.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/seat_selection.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/web/login_signup.html</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/SignupServlet.java</file>
+            <file>file:/home/rguktvalley/NetBeansProjects/SAMS/src/java/com/myproject/servlet/LoginServlet.java</file>
+        </group>
+    </open-files>
+</project-private>

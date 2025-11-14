@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SAMS | Student Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+<style>
+:root {
+  --primary:#5e3505;
+  --secondary:#ffd54f;
+  --bg:#f9f9f9;
+  --text:#1a1a1a;
+  --radius:14px;
+  --shadow:0 6px 16px rgba(0,0,0,0.1);
+  --gradient:linear-gradient(135deg,var(--primary),var(--secondary));
+  --sidebar-width:250px;
+}
+/* ===== Edit Profile Button ===== */
+.btn {
+  display: inline-block;
+  background: var(--gradient);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  background: var(--secondary);
+  color: var(--primary);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+* {
+  margin:0; padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins",sans-serif;
+  transition:all 0.25s ease;
+}
+html, body {
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+}
+body {
+  display:flex;
+  min-height:100vh;
+  overflow:hidden;
+}
+/* ===== Sidebar ===== */
+.sidebar {
+  width:var(--sidebar-width);
+  background:var(--primary);
+  color:#fff;
+  padding:2rem 1rem;
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+  position:fixed;
+  left:0; top:0; bottom:0;
+}
+.sidebar h2 {
+  font-size:1.5rem;
+  margin-bottom:1rem;
+  letter-spacing:1px;
+  text-align:center;
+}
+.sidebar a {
+  color:#fff;
+  text-decoration:none;
+  padding:.7rem 1rem;
+  border-radius:10px;
+  display:block;
+  font-weight:500;
+}
+.sidebar a.active, .sidebar a:hover {
+  background:var(--secondary);
+  color:var(--primary);
+  font-weight:700;
+}
+/* ===== Main Content ===== */
+.main {
+  margin-left:var(--sidebar-width);
+  flex:1;
+  padding:2rem;
+  overflow-y:auto;
+  background:#fffaf3;
+}
+.section { display:none; }
+.section.active { display:block; }
+
+/* ===== Dashboard Section ===== */
+.dashboard-banner {
+  background:var(--gradient);
+  color:#fff;
+  padding:1.2rem 1.6rem;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:1.5rem;
+}
+.dashboard-banner h1 {
+  font-size:1.6rem;
+}
+.dashboard-banner span {
+  font-weight:600;
+  text-transform:capitalize;
+}
+.flash-news {
+  background:var(--secondary);
+  color:var(--primary);
+  padding:.6rem 1rem;
+  border-radius:10px;
+  margin-bottom:1rem;
+  font-weight:500;
+  text-align:center;
+  animation: pulse 3s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50% { opacity:0.7; }
+}
+.stats-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1.2rem;
+  margin-bottom:2rem;
+}
+.stat-card {
+  background:#fff;
+  padding:1rem;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  text-align:center;
+  transition:transform .3s;
+}
+.stat-card:hover { transform:translateY(-5px); }
+.stat-card i {
+  font-size:2.2rem;
+  color:var(--primary);
+  margin-bottom:.5rem;
+}
+.stat-card h3 {
+  font-size:1.4rem;
+  color:var(--primary);
+  margin-bottom:.3rem;
+}
+.stat-card p { color:#666; }
+
+/* ===== Events & Tables ===== */
+.card-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1rem;
+}
+.card {
+  background:#fff;
+  padding:1rem;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+.btn-book {
+  background:var(--gradient);
+  color:#fff;
+  padding:0.5rem 1rem;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:0.5rem;
+  transition:background 0.3s;
+}
+.btn-book:hover {
+  background:#ffb74d;
+}
+
+/* ===== Profile ===== */
+#profile .card {
+  padding:1.5rem;
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  background:#fff;
+  text-align:left;
+  transition:transform 0.3s, box-shadow 0.3s;
+}
+#profile .card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 12px 24px rgba(0,0,0,0.18);
+}
+#profile .card p { margin:0.5rem 0; font-size:0.95rem; }
+#profile .card button {
+  margin-top:0.8rem;
+  width:100%;
+  background:var(--primary);
+  color:#fff;
+  font-weight:600;
+  transition:0.3s;
+}
+#profile .card button:hover {
+  background:var(--secondary);
+  color:var(--primary);
+}
+/* ===== Tables (Bookings & Pending) ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: #fff;
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+thead {
+  background: var(--primary);
+  color: #fff;
+}
+thead th {
+  padding: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+tbody td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+tbody tr:hover {
+  background: #fff5e6;
+}
+.btn-download, .btn-cancel {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-download {
+  background: var(--secondary);
+  color: var(--primary);
+}
+.btn-cancel {
+  background: #f44336;
+  color: #fff;
+}
+.btn-download:hover { background: #ffeb99; }
+.btn-cancel:hover { background: #d32f2f; }
+
+/* ===== Event Cards Styling ===== */
+#eventCards .card {
+  border: 1px solid #eee;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+#eventCards .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+#eventCards .card h3 {
+  color: var(--primary);
+  margin-bottom: 0.4rem;
+}
+#eventCards .card p {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* ===== Modal ===== */
+.modal {
+  position:fixed; left:0; top:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  display:flex; align-items:center; justify-content:center;
+  visibility:hidden; opacity:0;
+  transition:all .2s;
+}
+.modal.active { visibility:visible; opacity:1; }
+.modal-content {
+  background:#fff;
+  padding:1.4rem;
+  border-radius:10px;
+  width:380px; max-width:95%;
+  box-shadow:var(--shadow);
+}
+.modal-content input {
+  width:100%;
+  padding:.5rem;
+  margin:.35rem 0;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+.save-btn {
+  background:var(--primary);
+  color:#fff;
+  padding:.6rem 1rem;
+  border-radius:8px;
+  border:none;
+}
+.cancel-btn {
+  background:#ccc;
+  padding:.6rem 1rem;
+  border-radius:8px;
+  border:none;
+  margin-left:.6rem;
+}
+</style>
+</head>
+
+<body>
+<aside class="sidebar">
+  <h2>SAMS</h2>
+  <a href="#" class="nav-link active" data-target="dashboard">Dashboard</a>
+  <a href="#" class="nav-link" data-target="bookings">My Bookings</a>
+  <a href="#" class="nav-link" data-target="pending">Pending</a>
+  <a href="#" class="nav-link" data-target="events">Events</a>
+  <a href="#" class="nav-link" data-target="profile">Profile</a>
+  <a href="#" id="logout">Logout</a>
+</aside>
+
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="section active">
+    <div class="dashboard-banner">
+      <h1>Welcome Back, <span id="studentName">Student</span> 👋</h1>
+      <p style="font-size:0.9rem;opacity:0.9;">Have a productive day ahead!</p>
+    </div>
+<h2 style="margin-bottom:1rem;">Latest Announcements</h2>
+    <div class="flash-news" id="flashText">Loading latest campus updates...</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i class='bx bx-calendar-event'></i>
+        <h3>Upcoming Events</h3>
+        <p>Stay tuned for exciting campus activities.</p>
+      </div>
+      <div class="stat-card">
+        <i class='bx bx-book-content'></i>
+        <h3>My Bookings</h3>
+        <p>Track and manage your seat reservations.</p>
+      </div>
+      <div class="stat-card">
+        <i class='bx bx-user-circle'></i>
+        <h3>Profile</h3>
+        <p>Keep your details up to date anytime.</p>
+      </div>
+      <div class="stat-card">
+        <i class='bx bx-bulb'></i>
+        <h3>Tip of the Day</h3>
+        <p>Consistency is the key to success. Keep learning!</p>
+      </div>
+    </div>
+
+    
+    <div id="dashboardCards" class="card-grid"></div>
+  </section>
+
+  <!-- BOOKINGS -->
+  <section id="bookings" class="section">
+    <h2>My Confirmed Bookings</h2>
+    <table>
+      <thead><tr><th>Event</th><th>Seats</th><th>Amount</th><th>Status</th><th>Booking Date</th><th>Action</th></tr></thead>
+      <tbody id="bookingList"><tr><td colspan="6">Loading...</td></tr></tbody>
+    </table>
+  </section>
+
+  <!-- PENDING -->
+  <section id="pending" class="section">
+    <h2>Pending Reservations</h2>
+    <table>
+      <thead><tr><th>Event</th><th>Seats</th><th>Total</th><th>Status</th><th>Created At</th></tr></thead>
+      <tbody id="pendingList"><tr><td colspan="5">Loading...</td></tr></tbody>
+    </table>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="events" class="section">
+    <h2>Upcoming Events</h2>
+    <div id="eventCards" class="card-grid"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="profile" class="section">
+    <h2>Profile</h2>
+    <div class="card">
+      <p><strong>Name:</strong> <span id="displayName"></span></p>
+      <p><strong>Email:</strong> <span id="displayEmail"></span></p>
+      <p><strong>Department:</strong> <span id="displayDept"></span></p>
+      <p><strong>Year:</strong> <span id="displayYear"></span></p>
+      <button class="btn" onclick="openProfileModal()">Edit Profile</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Profile Modal -->
+<div id="profileModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <h3>Edit Profile</h3>
+    <form id="profileForm">
+      <input type="hidden" id="user_id" />
+      <label>Name</label>
+      <input type="text" id="username" required />
+      <label>Email</label>
+      <input type="email" id="email" required />
+      <label>Department</label>
+      <input type="text" id="department" />
+      <label>Year</label>
+      <input type="text" id="year" />
+      <div style="text-align:center;margin-top:8px">
+        <button type="submit" class="save-btn">Save</button>
+        <button type="button" class="cancel-btn" onclick="closeProfileModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ========== Navigation ========== */
+document.querySelectorAll('.nav-link').forEach(a=>{
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+    const t = a.dataset.target;
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(t).classList.add('active');
+  });
+});
+document.getElementById('logout').addEventListener('click', e=>{
+  e.preventDefault();
+  sessionStorage.clear(); localStorage.clear();
+  window.location = 'login_signup.html';
+});
+
+const username = sessionStorage.getItem('username') || localStorage.getItem('username') || 'student';
+const email = sessionStorage.getItem('email') || localStorage.getItem('email') || '';
+document.getElementById('studentName').textContent = username;
+
+/* ========== Load Events ========== */
+async function loadEvents() {
+    try {
+        const res = await fetch('ManagerServlet?action=listActive');
+        const data = await res.json();
+        const cont = document.getElementById('eventCards');
+        cont.innerHTML = '';
+
+        const events = Array.isArray(data) ? data : data.events || [];
+        if (events.length === 0) {
+            cont.innerHTML = '<p>No active events.</p>';
+            document.getElementById('flashText').textContent = 'No updates available';
+            return;
+        }
+
+        events.forEach(ev => {
+            const d = document.createElement('div');
+            d.className = 'card';
+            d.innerHTML = `
+                <h3>${escapeHtml(ev.title)}</h3>
+                <p><strong>📅</strong> ${ev.event_date || 'TBA'}</p>
+                <p>${escapeHtml(ev.description || '')}</p>
+                <button class="btn-book" onclick="location.href='seat_selection.html?name=${encodeURIComponent(ev.title)}&date=${encodeURIComponent(ev.event_date || '')}'">Book Now</button>
+            `;
+            cont.appendChild(d);
+        });
+
+        document.getElementById('flashText').textContent = events.map(e => e.title || 'Untitled Event').join(' | ');
+
+    } catch (err) {
+        console.error('Events load error', err);
+        document.getElementById('eventCards').innerHTML = '<p>Failed to load events.</p>';
+        document.getElementById('flashText').textContent = 'Failed to load updates';
+    }
+}
+
+/* ========== Load Pending reservations ========== */
+async function loadPending(){
+    try{
+        const res = await fetch(`StudentBookingServlet?action=pending&username=${encodeURIComponent(username)}`);
+        const json = await res.json();
+        const tbody = document.getElementById('pendingList');
+        tbody.innerHTML = '';
+        if (!json.success || !Array.isArray(json.pending) || json.pending.length === 0){
+            tbody.innerHTML = '<tr><td colspan="6">No pending reservations</td></tr>'; 
+            return;
+        }
+        json.pending.forEach(r=>{
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${escapeHtml(r.event_title)}</td>
+                <td>${escapeHtml(r.seats)}</td>
+                <td>${r.total}</td>
+                <td>${escapeHtml(r.status)}</td>
+                <td>${escapeHtml(r.created_at)}</td>
+               
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err){
+        console.error('Pending load error', err); 
+        tbody.innerHTML = '<tr><td colspan="6">Error loading</td></tr>'; 
+    }
+}
+
+
+async function cancelPending(id){
+  if(!confirm("Are you sure you want to cancel this reservation?")) return;
+  try{
+    const res = await fetch(`StudentBookingServlet?action=cancel&id=${id}`);
+    const json = await res.json();
+    if(json.success){
+      alert("Reservation cancelled successfully!");
+      loadPending(); // refresh table
+    } else alert("Cancel failed: "+(json.error||"Unknown error"));
+  } catch(err){
+    console.error(err);
+    alert("Error cancelling reservation");
+  }
+}
+
+
+/* ========== Load Confirmed bookings ========== */
+async function loadBooked(){
+  try{
+    const res = await fetch(`StudentBookingServlet?action=booked&username=${encodeURIComponent(username)}`);
+    const json = await res.json();
+    const tbody = document.getElementById('bookingList');
+    tbody.innerHTML = '';
+    if (!json.success || !Array.isArray(json.booked) || json.booked.length === 0){
+      tbody.innerHTML = '<tr><td colspan="6">No confirmed bookings</td></tr>'; return;
+    }
+    json.booked.forEach(b=>{
+      if ((b.status || '').toLowerCase() !== 'approved') return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escapeHtml(b.event_name)}</td>
+                      <td>${escapeHtml(b.seats)}</td>
+                      <td>₹${b.amount}</td>
+                      <td>${escapeHtml(b.status)}</td>
+                      <td>${escapeHtml(b.booking_date)}</td>
+                      <td>
+                        <button class="btn-download" onclick="downloadTicket(${b.id})">Download</button>
+                        <button class="btn-cancel" onclick="cancelBooking(${b.id})">Cancel</button>
+                      </td>`;
+      tbody.appendChild(tr);
+    });
+    if(tbody.children.length===0) tbody.innerHTML='<tr><td colspan="6">No confirmed bookings</td></tr>';
+  } catch(err){ console.error(err); document.getElementById('bookingList').innerHTML='<tr><td colspan="6">Error loading</td></tr>'; }
+}
+
+/* ===== Cancel Booking ===== */
+async function cancelBooking(id){
+  if(!confirm("Are you sure you want to cancel this booking?")) return;
+  try{
+    const res = await fetch(`StudentBookingServlet?action=cancel&id=${id}`);
+    const json = await res.json();
+    if(json.success){
+      alert("Booking cancelled successfully!");
+      loadBooked();
+    } else alert("Cancel failed: "+(json.error||"Unknown error"));
+  } catch(err){
+    console.error(err);
+    alert("Error cancelling booking");
+  }
+}
+
+/* ========== Profile load & update ========== */
+async function loadProfile() {
+    try {
+        const res = await fetch('StudentServlet?action=getProfile');
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('displayName').textContent = data.username;
+            document.getElementById('displayEmail').textContent = data.email;
+            document.getElementById('displayDept').textContent = data.department || '—';
+            document.getElementById('displayYear').textContent = data.year || '—';
+            document.getElementById('user_id').value = data.user_id;
+            document.getElementById('username').value = data.username;
+            document.getElementById('email').value = data.email;
+            document.getElementById('department').value = data.department || '';
+            document.getElementById('year').value = data.year || '';
+        }
+    } catch(err){ console.error(err); }
+}
+function openProfileModal(){ document.getElementById('profileModal').classList.add('active'); }
+function closeProfileModal(){ document.getElementById('profileModal').classList.remove('active'); }
+document.getElementById('profileForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const form = new URLSearchParams();
+    form.append('action','updateProfile');
+    form.append('user_id', document.getElementById('user_id').value);
+    form.append('username', document.getElementById('username').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('department', document.getElementById('department').value);
+    form.append('year', document.getElementById('year').value);
+    try {
+        const res = await fetch('StudentServlet',{
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body: form
+        });
+        const json = await res.json();
+        if(json.success){ alert('Profile updated!'); closeProfileModal(); loadProfile(); document.getElementById('studentName').textContent=document.getElementById('username').value; }
+        else alert('Profile update failed: '+(json.error||'Unknown error'));
+    } catch(err){ console.error(err); alert('Error updating profile'); }
+});
+
+function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function downloadTicket(id){window.open(`TicketServlet?action=getTicket&id=${id}`, '_blank');}
+
+/* ========== Init load ========== */
+loadEvents(); loadPending(); loadBooked(); loadProfile();
+
+</script>
+</body>
+</html>

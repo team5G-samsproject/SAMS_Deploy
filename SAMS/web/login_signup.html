@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAMS | Login / Signup</title>
+  <style>
+    :root {
+      --orange: #ff7a18;
+      --brown: #3e2723;
+      --accent: #f5c07a;
+      --bg: #fdf8f5;
+      --text: #2d1b16;
+      --radius: 12px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      --gradient: linear-gradient(135deg, var(--orange), var(--brown));
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { height: 100vh; width: 100vw; background: var(--bg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .wrapper { display: flex; width: 900px; height: 600px; background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .image-section { flex: 1.1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .image-section img { width: 100%; height: 100%; object-fit: cover; }
+    .form-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; background: white; overflow: hidden; }
+    .logo { font-size: 1.8rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; text-align: center; }
+    .container { width: 100%; max-width: 380px; }
+    .tabs { display: flex; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 2px solid #eee; }
+    .tab { flex: 1; text-align: center; padding: 0.8rem 0; font-weight: 600; cursor: pointer; transition: all 0.3s ease; color: var(--brown); position: relative; }
+    .tab.active { color: var(--orange); }
+    .tab.active::after { content: ""; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px; background: var(--gradient); border-radius: 3px; }
+    form { display: none; flex-direction: column; gap: 1rem; animation: fadeIn 0.4s ease; }
+    form.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    label { font-weight: 500; color: var(--brown); font-size: 0.9rem; }
+    input, select { width: 100%; padding: 0.7rem 1rem; border: 1px solid #ddd; border-radius: var(--radius); outline: none; font-size: 0.95rem; transition: all 0.3s; }
+    input:focus, select:focus { border-color: var(--orange); box-shadow: 0 0 6px rgba(255, 122, 24, 0.3); }
+    button { background: var(--gradient); color: white; border: none; padding: 0.8rem; font-size: 1rem; border-radius: var(--radius); cursor: pointer; font-weight: 600; box-shadow: var(--shadow); transition: all 0.3s ease; }
+    button:hover { transform: scale(1.05); }
+    .toggle-text { text-align: center; font-size: 0.9rem; margin-top: 1rem; color: #555; }
+    .toggle-text span { color: var(--orange); cursor: pointer; font-weight: 600; }
+    .message { padding: 10px; margin-bottom: 1rem; border-radius: 5px; text-align: center; font-weight: 600; }
+    @media (max-width: 768px) { .wrapper { flex-direction: column; width: 95%; } .image-section { display: none; } .form-section { padding: 1.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="image-section">
+      <img src="images/Login.jpeg" alt="Students studying">
+    </div>
+
+    <div class="form-section">
+      <div class="logo">SAMS</div>
+      <div class="container" id="message-container"></div>
+
+      <div class="container">
+        <div class="tabs">
+          <div class="tab active" id="login-tab">Login</div>
+          <div class="tab" id="signup-tab">Signup</div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="active" action="LoginServlet" method="post">
+          <label for="login-role">Select Role</label>
+          <select id="login-role" name="login-role" required>
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="salesperson">Sales Person</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <label for="login-email">Email / Username</label>
+          <input type="text" id="login-email" name="login-email" placeholder="Enter username or email" required />
+
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="login-password" placeholder="Enter password" required />
+
+          <button type="submit">Login</button>
+          <div class="toggle-text">Don’t have an account? <span id="go-signup">Signup</span></div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signup-form" action="SignupServlet" method="post">
+          <label for="signup-role">Select Role</label>
+          <select id="signup-role" name="signup-role" required>
+            <option value="student">Student</option>
+          </select>
+
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter username" required />
+
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" name="signup-email" placeholder="Enter email" required />
+
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" name="signup-password" placeholder="Create password" required />
+
+          <button type="submit">Create Account</button>
+          <div class="toggle-text">Already have an account? <span id="go-login">Login</span></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    const loginTab = document.getElementById('login-tab');
+    const signupTab = document.getElementById('signup-tab');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const goSignup = document.getElementById('go-signup');
+    const goLogin = document.getElementById('go-login');
+
+    loginTab.onclick = () => {
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      loginForm.classList.add('active');
+      signupForm.classList.remove('active');
+    };
+
+    signupTab.onclick = () => {
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      signupForm.classList.add('active');
+      loginForm.classList.remove('active');
+    };
+
+    goSignup.onclick = () => signupTab.click();
+    goLogin.onclick = () => loginTab.click();
+
+    // Show messages from servlet
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const signupStatus = params.get('signup');
+      if (signupStatus) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        if (signupStatus === 'success') {
+          messageDiv.style.backgroundColor = '#d4edda';
+          messageDiv.style.color = '#155724';
+          messageDiv.textContent = '✅ Signup successful! Please login.';
+        } else if (signupStatus === 'failure') {
+          messageDiv.style.backgroundColor = '#f8d7da';
+          messageDiv.style.color = '#721c24';
+          messageDiv.textContent = '❌ Signup failed. Try again.';
+        } else if (signupStatus === 'empty') {
+          messageDiv.style.backgroundColor = '#f8d7da';
+          messageDiv.style.color = '#721c24';
+          messageDiv.textContent = '❌ All fields are required!';
+        } else if (signupStatus === 'dbfail') {
+          messageDiv.style.backgroundColor = '#f8d7da';
+          messageDiv.style.color = '#721c24';
+          messageDiv.textContent = '❌ Database connection failed!';
+        } else if (signupStatus === 'error') {
+          messageDiv.style.backgroundColor = '#f8d7da';
+          messageDiv.style.color = '#721c24';
+          messageDiv.textContent = '❌ Something went wrong!';
+        }
+        document.getElementById('message-container').appendChild(messageDiv);
+      }
+    });
+  </script>
+</body>
+</html>
