@@ -1,12 +1,13 @@
-# Use Apache Tomcat 9 (compatible with JSP + Servlets)
 FROM tomcat:9.0
 
-# Copy your SAMS.war file into Tomcat webapps folder
-COPY ./SAMS.war /usr/local/tomcat/webapps/
+# Remove default ROOT app
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
 
-# Expose port 8080 for web traffic
+# Copy your WAR file
+COPY SAMS.war /usr/local/tomcat/webapps/SAMS.war
+
+# Expose port
 EXPOSE 8080
 
-# Start Tomcat server
+# Start tomcat
 CMD ["catalina.sh", "run"]
-
